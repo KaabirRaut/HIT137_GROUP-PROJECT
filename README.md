@@ -1,1 +1,1 @@
-# Kabir_HIT137
+This repository contains all the required files for the assignment. It includes three Python programs: one for encrypting and decrypting text, one for analyzing temperature data from Australian weather stations, and one for drawing a tree using turtle graphics. All the contribution or work from all the members has been managed and saved here.
