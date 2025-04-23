@@ -1,155 +1,123 @@
-# Question 1 solution:
-def encrypt_char(c, n, m):
-    if 'a' <= c <= 'z':
-        if c <= 'm':
-            # First half of lowercase: shift forward by n*m
-            shift = n * m
-            new_ord = ord(c) + shift
-            # Handle wrap-around
-            new_ord = ord('a') + (new_ord - ord('a')) % 26
-            return (chr(new_ord), 'lower_first')
+def encrypt_char(character, multiplier_n, multiplier_m):
+    if 'a' <= character <= 'z':
+        if character <= 'm':
+            shift = multiplier_n * multiplier_m
+            new_char = ord('a') + (ord(character) + shift - ord('a')) % 26
+            return chr(new_char), 'lower_first'
         else:
-            # Second half of lowercase: shift backward by n+m
-            shift = n + m
-            new_ord = ord(c) - shift
-            # Handle wrap-around
-            new_ord = ord('a') + (new_ord - ord('a')) % 26
-            return (chr(new_ord), 'lower_second')
-    elif 'A' <= c <= 'Z':
-        if c <= 'M':
-            # First half of uppercase: shift backward by n
-            shift = n
-            new_ord = ord(c) - shift
-            # Handle wrap-around
-            new_ord = ord('A') + (new_ord - ord('A')) % 26
-            return (chr(new_ord), 'upper_first')
+            shift = multiplier_n + multiplier_m
+            new_char = ord('a') + (ord(character) - shift - ord('a')) % 26
+            return chr(new_char), 'lower_second'
+    elif 'A' <= character <= 'Z':
+        if character <= 'M':
+            shift = multiplier_n
+            new_char = ord('A') + (ord(character) - shift - ord('A')) % 26
+            return chr(new_char), 'upper_first'
         else:
-            # Second half of uppercase: shift forward by m^2
-            shift = m ** 2
-            new_ord = ord(c) + shift
-            # Handle wrap-around
-            new_ord = ord('A') + (new_ord - ord('A')) % 26
-            return (chr(new_ord), 'upper_second')
+            shift = multiplier_m ** 2
+            new_char = ord('A') + (ord(character) + shift - ord('A')) % 26
+            return chr(new_char), 'upper_second'
     else:
-        # Special characters and numbers remain unchanged
-        return (c, 'other')
+        return character, 'other'
 
-def decrypt_char(c, encryption_type, n, m):
+
+def decrypt_char(character, encryption_type, multiplier_n, multiplier_m):
     if encryption_type == 'lower_first':
-        # Reverse first half lowercase encryption
-        shift = n * m
-        new_ord = ord(c) - shift
-        new_ord = ord('a') + (new_ord - ord('a')) % 26
-        return chr(new_ord)
+        shift = multiplier_n * multiplier_m
+        new_char = ord('a') + (ord(character) - shift - ord('a')) % 26
+        return chr(new_char)
     elif encryption_type == 'lower_second':
-        # Reverse second half lowercase encryption
-        shift = n + m
-        new_ord = ord(c) + shift
-        new_ord = ord('a') + (new_ord - ord('a')) % 26
-        return chr(new_ord)
+        shift = multiplier_n + multiplier_m
+        new_char = ord('a') + (ord(character) + shift - ord('a')) % 26
+        return chr(new_char)
     elif encryption_type == 'upper_first':
-        # Reverse first half uppercase encryption
-        shift = n
-        new_ord = ord(c) + shift
-        new_ord = ord('A') + (new_ord - ord('A')) % 26
-        return chr(new_ord)
+        shift = multiplier_n
+        new_char = ord('A') + (ord(character) + shift - ord('A')) % 26
+        return chr(new_char)
     elif encryption_type == 'upper_second':
-        # Reverse second half uppercase encryption
-        shift = m ** 2
-        new_ord = ord(c) - shift
-        new_ord = ord('A') + (new_ord - ord('A')) % 26
-        return chr(new_ord)
+        shift = multiplier_m ** 2
+        new_char = ord('A') + (ord(character) - shift - ord('A')) % 26
+        return chr(new_char)
     else:
-        # Special characters and numbers remain unchanged
-        return c
+        return character
 
-def encrypt_file(input_file, output_file, n, m):
-    try:
-        with open(input_file, 'r') as f:
-            content = f.read()
-        
-        encrypted_chars = [encrypt_char(c, n, m) for c in content]
-        encrypted_content = ''.join([char for char, _ in encrypted_chars])
-        
-        # Save both the encrypted content and the encryption types
-        with open(output_file, 'w') as f:
-            f.write(encrypted_content)
-        
-        # Save encryption types to a separate file for decryption
-        with open(output_file + '.types', 'w') as f:
-            f.write(','.join([etype for _, etype in encrypted_chars]))
-            
-        print(f"✅ File encrypted successfully and saved to {output_file}")
-    except Exception as e:
-        print(f"❌ Error during encryption: {e}")
 
-def decrypt_file(input_file, output_file, n, m):
+def encrypt_file(input_file_path, output_file_path, multiplier_n, multiplier_m):
     try:
-        with open(input_file, 'r') as f:
-            content = f.read()
-        
-        # Read the encryption types
-        with open(input_file + '.types', 'r') as f:
-            encryption_types = f.read().split(',')
-        
-        decrypted_content = ''.join([
-            decrypt_char(c, etype, n, m) 
-            for c, etype in zip(content, encryption_types)
-        ])
-        
-        with open(output_file, 'w') as f:
-            f.write(decrypted_content)
-            
-        print(f"✅ File decrypted successfully and saved to {output_file}")
-        return decrypted_content
-    except Exception as e:
-        print(f"❌ Error during decryption: {e}")
+        with open(input_file_path, 'r') as file:
+            file_content = file.read()
+
+        encrypted_data = [encrypt_char(char, multiplier_n, multiplier_m) for char in file_content]
+        encrypted_text = ''.join([char for char, _ in encrypted_data])
+        encryption_types = ','.join([enc_type for _, enc_type in encrypted_data])
+
+        with open(output_file_path, 'w') as file:
+            file.write(encrypted_text)
+
+        with open(output_file_path + '.types', 'w') as file:
+            file.write(encryption_types)
+
+        print(f"File encrypted and saved to {output_file_path}")
+    except Exception as error:
+        print(f"Error: {error}")
+
+
+def decrypt_file(input_file_path, output_file_path, multiplier_n, multiplier_m):
+    try:
+        with open(input_file_path, 'r') as file:
+            encrypted_text = file.read()
+
+        with open(input_file_path + '.types', 'r') as file:
+            encryption_types = file.read().split(',')
+
+        decrypted_text = ''.join(
+            decrypt_char(char, enc_type, multiplier_n, multiplier_m) for char, enc_type in zip(encrypted_text, encryption_types)
+        )
+
+        with open(output_file_path, 'w') as file:
+            file.write(decrypted_text)
+
+        print(f"File decrypted and saved to {output_file_path}")
+        return decrypted_text
+    except Exception as error:
+        print(f"Error: {error}")
         return None
 
-def verify_decryption(original_file, decrypted_content):
+
+def verify_decryption(original_file_path, decrypted_text):
     try:
-        with open(original_file, 'r') as f:
-            original_content = f.read()
-        
-        if original_content == decrypted_content:
-            print("✅ Verification successful: Decrypted content matches original")
+        with open(original_file_path, 'r') as file:
+            original_text = file.read()
+
+        if original_text == decrypted_text:
+            print("Decryption verified successfully")
             return True
         else:
-            print("❌ Verification failed: Decrypted content does NOT match original")
-            # Print first 10 differing characters for debugging
-            print("\nDebugging info (first 10 differences):")
-            for i, (orig, dec) in enumerate(zip(original_content, decrypted_content)):
-                if orig != dec:
-                    print(f"Position {i}: Original '{orig}' (ord={ord(orig)}), Decrypted '{dec}' (ord={ord(dec)})")
-                    if len([x for x in original_content if x != decrypted_content[original_content.index(x)]]) >= 10:
-                        break
+            print("Decryption verification failed")
             return False
-    except Exception as e:
-        print(f"❌Error during verification: {e}")
+    except Exception as error:
+        print(f"Error: {error}")
         return False
 
+
 def main():
-    # Get user inputs for n and m
     try:
-        n = int(input("Enter value for n (integer): "))
-        m = int(input("Enter value for m (integer): "))
+        multiplier_n = int(input("Enter multiplier n: "))
+        multiplier_m = int(input("Enter multiplier m: "))
     except ValueError:
-        print("Please enter valid integers for n and m")
+        print("Invalid input. Enter integers only.")
         return
-    
-    input_file = "raw_text.txt"
-    encrypted_file = "encrypted_text.txt"
-    decrypted_file = "decrypted_text.txt"
-    
-    # Encrypt the file
-    encrypt_file(input_file, encrypted_file, n, m)
-    
-    # Decrypt the file
-    decrypted_content = decrypt_file(encrypted_file, decrypted_file, n, m)
-    
-    # Verify the decryption
-    if decrypted_content is not None:
-        verify_decryption(input_file, decrypted_content)
+
+    input_file_path = "raw_text.txt"
+    encrypted_file_path = "encrypted_text.txt"
+    decrypted_file_path = "decrypted_text.txt"
+
+    encrypt_file(input_file_path, encrypted_file_path, multiplier_n, multiplier_m)
+    decrypted_text = decrypt_file(encrypted_file_path, decrypted_file_path, multiplier_n, multiplier_m)
+
+    if decrypted_text is not None:
+        verify_decryption(input_file_path, decrypted_text)
+
 
 if __name__ == "__main__":
     main()
